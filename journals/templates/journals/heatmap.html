@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Activity Heatmap{% endblock %}
+
+{% block content %}
+    <h1 class="text-2xl mb-4">Activity Heatmap</h1>
+    <div id="heatmap" class="p-4"></div>
+    <script src="https://d3js.org/d3.v3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.css">
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            console.log("Heatmap data:", {{ heatmap_data | safe }});
+            console.log("D3 loaded:", typeof d3 !== 'undefined');
+            console.log("CalHeatMap loaded:", typeof CalHeatMap !== 'undefined');
+
+            try {
+                const cal = new CalHeatMap();
+                cal.init({
+                    itemSelector: '#heatmap',
+                    domain: 'month',
+                    subDomain: 'day',
+                    data: {{ heatmap_data | safe }},
+                    start: new Date(new Date().getFullYear(), 0, 1),
+                    range: 12,
+                    cellSize: 20,
+                    domainGutter: 10,
+                    legend: [1, 2, 3, 4],
+                    legendColors: {
+                        min: "#ebedf0",
+                        max: "#30c030"
+                    }
+                });
+            } catch (e) {
+                console.error("CalHeatMap error:", e);
+            }
+        });
+    </script>
+{% endblock %}

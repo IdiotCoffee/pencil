@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Delete Journal{% endblock %}
+{% block content %}
+    <h1 class="text-2xl mb-4">Delete Journal</h1>
+    <p>Are you sure you want to delete the journal "{{ journal.title }}"? This will also delete all its entries and cannot be undone.</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded">Confirm Delete</button>
+        <a href="{% url 'journal_detail' journal.id %}" class="bg-gray-500 text-white px-4 py-2 rounded">Cancel</a>
+    </form>
+{% endblock %}

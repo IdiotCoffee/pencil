@@ -1,0 +1,16 @@
+asgiref
+   boto3
+   botocore
+   charset-normalizer
+   Django
+   django-storages
+   jmespath
+   markdown
+   pillow
+   python-dateutil
+   python-dotenv
+   reportlab
+   s3transfer
+   six
+   sqlparse
+   urllib3

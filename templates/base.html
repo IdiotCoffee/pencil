@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html class="min-h-screen">
+<head>
+    <title>{% block title %}Journal{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/marked.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+
+    {% block navbar %}
+    <nav class="bg-gray-900 h-16 px-6 flex justify-between items-center shadow text-white text-lg">
+        <div class="flex gap-6">
+            <a href="{% url 'journal_list' %}" class="hover:underline">Home</a>
+            <a href="{% url 'activity_heatmap' %}" class="hover:underline">Heatmap</a>
+            <a href="{% url 'public_journals' %}" class="hover:underline">Browse Public Journals</a>
+        </div>
+        <div class="flex items-center gap-4">
+            {% if user.is_authenticated %}
+                <span class="text-sm">Hello, {{ user.username }}</span>
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="hover:underline">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'register' %}" class="hover:underline">Register</a>
+            {% endif %}
+        </div>
+    </nav>
+    {% endblock %}
+
+    <div class="container mx-auto p-6">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

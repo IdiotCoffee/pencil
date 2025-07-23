@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Share {{ journal.title }}{% endblock %}
+{% block content %}
+    <h1 class="text-2xl mb-4">Share {{ journal.title }}</h1>
+    {% if messages %}
+        <ul class="mb-4">
+            {% for message in messages %}
+                <li class="{% if message.tags == 'success' %}text-green-600{% else %}text-red-600{% endif %}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+    <form method="post" class="space-y-4">
+        {% csrf_token %}
+        <div>
+            <label for="username" class="block">Username</label>
+            <input type="text" name="username" id="username" class="border p-2 w-full" required>
+        </div>
+        <div>
+            <label for="can_edit" class="block"><input type="checkbox" name="can_edit" id="can_edit"> Allow Editing</label>
+        </div>
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Share</button>
+    </form>
+    <h2 class="text-xl mt-4">Current Permissions</h2>
+    <ul>
+        {% for perm in permissions %}
+            <li>{{ perm.user.username }} - {{ perm.can_edit|yesno:"Edit,Read-only" }}</li>
+        {% endfor %}
+    </ul>
+{% endblock %}

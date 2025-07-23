@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'your-fallback-secret-key')
 DEBUG = False
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['https://pencil-909v.onrender.com']
 
 # Application definition
 INSTALLED_APPS = [

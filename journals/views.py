@@ -149,13 +149,20 @@ def delete_entry(request, journal_id, entry_id):
 @login_required
 def delete_journal(request, journal_id):
     journal = get_object_or_404(Journal, id=journal_id)
-    if journal.owner != request.user:
+    # Allow deletion by the journal owner or the moderator "ishaan"
+    if journal.owner != request.user and request.user.username != "ishaan":
         return HttpResponse("Unauthorized", status=401)
     if request.method == 'POST':
         journal.delete()
         messages.success(request, "Journal deleted successfully.")
-        return redirect('journal_list')
-    return render(request, 'journals/delete_journal.html', {'journal': journal})
+        # Redirect to public_journals if deleted from public section, else journal_list
+        redirect_url = 'public_journals' if request.GET.get('section') == 'public' else 'journal_list'
+        return redirect(redirect_url)
+    # Pass section context to template
+    return render(request, 'journals/delete_journal.html', {
+        'journal': journal,
+        'section': request.GET.get('section', '')
+    })
 
 @login_required
 def share_journal(request, journal_id):

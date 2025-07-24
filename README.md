@@ -5,7 +5,7 @@ Pencil is a collaboration-first journaling platform built for developers, design
 Whether you're documenting a solo project or working in a team, Pencil gives you versioned journals, Markdown writing, real-time collaboration, and the ability to share or publish your work.
 
 Live at: [https://pencil-909v.onrender.com](https://pencil-909v.onrender.com)
-
+⚠️ Heads up: Since this is running on Render’s free plan, the site goes to sleep after 15 minutes of inactivity. If it takes a bit to load, it’s just waking up.
 ---
 
 ## 🧠 Why Pencil Exists

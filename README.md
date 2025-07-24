@@ -110,14 +110,8 @@ Start a journal. Share it. Build something.
 
 ---
 
-## 🪪 License
-
-This project is open-sourced under the MIT License.
-
----
-
 ## 🧑‍💻 Author
 
-Built by [Your Name]  
-Computer Engineering Graduate · Learning Django + AWS · [India]  
+Built by IdiotCoffee 
+Computer Engineering Graduate · Learning Django + AWS 
 

@@ -2,185 +2,111 @@
 {% block title %}Journals{% endblock %}
 
 {% block content %}
-<style>
-    .page-wrapper {
-        font-family: monospace;
-        color: white;
-        margin: 0;
-        padding: 0;
-    }
+<div class="max-w-4xl mx-auto py-10 text-black font-sans" style="font-family: 'Inter', sans-serif;">
 
-    .journal-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        flex-wrap: wrap;
-    }
+    <!-- Section Heading -->
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold">
+            {% if request.GET.section == "shared" %}
+                Shared with You
+            {% elif request.GET.section == "public" %}
+                Public Journals
+            {% elif request.GET.section == "activity" %}
+                Your Activity
+            {% else %}
+                My Journals
+            {% endif %}
+        </h1>
 
-    .journal-heading {
-        text-align: center;
-        width: 100%;
-        font-size: 40px;
-        font-weight: bold;
-        color: white;
-        margin-bottom: 40px;
-        letter-spacing: 1px;
-    }
-
-    .create-button {
-        position: relative;
-        display: flex;
-        align-items: center;
-        background-color: #3b82f6;
-        color: white;
-        border: none;
-        border-radius: 9999px;
-        width: 48px;
-        height: 48px;
-        cursor: pointer;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-        transition: width 0.3s ease, padding 0.3s ease;
-        white-space: nowrap;
-        justify-content: center;
-        padding: 0;
-        text-decoration: none;
-        margin-left: auto;
-    }
-
-    .create-button .plus {
-        font-size: 24px;
-        font-weight: bold;
-        margin-left: 2px;
-    }
-
-    .create-button .label {
-        margin-left: 12px;
-        opacity: 0;
-        transform: translateX(10px);
-        transition: opacity 0.3s ease, transform 0.3s ease;
-        font-size: 14px;
-    }
-
-    .create-button:hover {
-        width: 160px;
-        padding: 0 16px;
-        justify-content: flex-start;
-    }
-
-    .create-button:hover .label {
-        opacity: 1;
-        transform: translateX(0);
-    }
-
-    .journal-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 20px;
-    }
-
-    .journal-card {
-        background-color: #1e1e1e;
-        border: 1px solid #2a2a2a;
-        border-radius: 16px;
-        padding: 20px;
-        box-shadow: 0 0 16px rgba(0, 0, 0, 0.4);
-        transition: transform 0.2s ease;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        height: 280px;
-        position: relative;
-    }
-
-    .journal-card:hover {
-        transform: translateY(-5px);
-    }
-
-    .journal-card a.title {
-        color: white;
-        font-size: 20px;
-        font-weight: bold;
-        text-decoration: underline;
-    }
-
-    .owner-badge,
-    .shared-badge {
-        position: absolute;
-        top: 12px;
-        right: 12px;
-        font-size: 12px;
-        font-weight: bold;
-        padding: 4px 8px;
-        border-radius: 6px;
-    }
-
-    .owner-badge {
-        color: #00ffff;
-        background-color: rgba(0, 255, 255, 0.1);
-    }
-
-    .shared-badge {
-        color: #ff4d4d;
-        background-color: rgba(255, 77, 77, 0.1);
-        text-shadow: 0 0 3px #ff4d4d;
-    }
-
-    .share-button {
-        margin-top: 20px;
-        display: inline-block;
-        color: white;
-        background-color: #22c55e;
-        padding: 6px 12px;
-        font-size: 13px;
-        border-radius: 6px;
-        text-decoration: none;
-        transition: background-color 0.2s ease;
-        align-self: flex-start;
-    }
-
-    .share-button:hover {
-        background-color: #16a34a;
-    }
-
-    .created-date {
-        font-size: 12px;
-        color: #bbbbbb;
-        position: absolute;
-        bottom: 12px;
-        right: 16px;
-    }
-</style>
-
-<div class="page-wrapper px-6 py-10">
-    <div class="journal-header">
-        <h1 class="journal-heading">Your Journals</h1>
-        <a href="{% url 'create_journal' %}" class="create-button">
-            <span class="plus">+</span>
-            <span class="label">Add Journal</span>
-        </a>
+        {% if not request.GET.section %}
+            <a href="{% url 'create_journal' %}" 
+               class="inline-block px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition duration-300 shadow-md">
+                + Add Journal
+            </a>
+        {% endif %}
     </div>
 
-    <div class="journal-grid">
-        {% for journal in journals %}
-            <div class="journal-card">
-                <a href="{% url 'journal_detail' journal.id %}" class="title">{{ journal.title }}</a>
-
-                {% if journal.owner == user %}
-                    <div class="owner-badge">OWNER</div>
-                    <a href="{% url 'share_journal' journal.id %}" class="share-button">[SHARE]</a>
-                {% elif journal.shared_by %}
-                    <div class="shared-badge">{{ journal.shared_by.username | title }}</div>
-                {% endif %}
-
-                <div class="created-date">
-                    Created: {{ journal.created_at|date:"F j, Y" }}
-                </div>
+    <!-- Journals Grid -->
+    {% if request.GET.section == "shared" %}
+        {% for journal in shared_journals %}
+            <div class="bg-gray-100 p-4 rounded-lg mb-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <h2 class="text-xl font-semibold">{{ journal.title }}</h2>
+                <p class="text-sm text-gray-600">Shared by {{ journal.shared_by.username }}</p>
+                <p class="text-gray-700 mt-2">{{ journal.entries.first.content|truncatewords:20 }}</p>
+                <a href="{% url 'journal_detail' journal.id %}" 
+                   class="inline-block mt-3 px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition duration-300 shadow-sm">
+                    View Journal
+                </a>
             </div>
         {% empty %}
-            <p>No journals yet.</p>
+            <p>No shared journals.</p>
         {% endfor %}
-    </div>
+
+    {% elif request.GET.section == "public" %}
+        {% for journal in public_journals %}
+            <div class="bg-gray-100 p-4 rounded-lg mb-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <h2 class="text-xl font-semibold">{{ journal.title }}</h2>
+                <p class="text-sm text-gray-600">By {{ journal.owner.username }}</p>
+                <p class="text-gray-700 mt-2">{{ journal.entries.first.content|truncatewords:20 }}</p>
+                <a href="{% url 'journal_detail' journal.id %}" 
+                   class="inline-block mt-3 px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition duration-300 shadow-sm">
+                    View Journal
+                </a>
+            </div>
+        {% empty %}
+            <p>No public journals.</p>
+        {% endfor %}
+
+    {% elif request.GET.section == "activity" %}
+        <h2 class="text-2xl font-bold mb-4">Your Activity</h2>
+        <div id="heatmap" class="p-4"></div>
+
+        <script src="https://d3js.org/d3.v3.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.min.js"></script>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.css">
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                console.log("Heatmap data:", {{ heatmap_data | safe }});
+                console.log("D3 loaded:", typeof d3 !== 'undefined');
+                console.log("CalHeatMap loaded:", typeof CalHeatMap !== 'undefined');
+
+                try {
+                    const cal = new CalHeatMap();
+                    cal.init({
+                        itemSelector: '#heatmap',
+                        domain: 'month',
+                        subDomain: 'day',
+                        data: {{ heatmap_data | safe }},
+                        start: new Date(new Date().getFullYear(), 0, 1),
+                        range: 12,
+                        cellSize: 20,
+                        domainGutter: 10,
+                        legend: [1, 2, 3, 4],
+                        legendColors: {
+                            min: "#ebedf0",
+                            max: "#30c030"
+                        }
+                    });
+                } catch (e) {
+                    console.error("CalHeatMap error:", e);
+                }
+            });
+        </script>
+
+    {% else %}
+        {% for journal in owned_journals %}
+            <div class="bg-gray-100 p-4 rounded-lg mb-4 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                <h2 class="text-xl font-semibold">{{ journal.title }}</h2>
+                <p class="text-gray-700 mt-2">{{ journal.entries.first.content|truncatewords:20 }}</p>
+                <a href="{% url 'journal_detail' journal.id %}" 
+                   class="inline-block mt-3 px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700 transition duration-300 shadow-sm">
+                    View Journal
+                </a>
+            </div>
+        {% empty %}
+            <p>You have no journals yet.</p>
+        {% endfor %}
+    {% endif %}
 </div>
 {% endblock %}

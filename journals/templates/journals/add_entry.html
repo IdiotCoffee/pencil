@@ -1,37 +1,83 @@
 {% extends 'base.html' %}
 {% block title %}Add Entry{% endblock %}
-{% block content %}
-<div class="max-w-4xl mx-auto py-10 text-white font-mono">
-    <h1 class="text-3xl font-bold mb-6">Add Entry to {{ journal.title }}</h1>
 
+{% block content %}
+<div class="max-w-4xl mx-auto py-10 text-gray-900 font-sans" style="font-family: 'Inter', sans-serif;">
+    <!-- Page Title + Autosave Indicator -->
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-3xl font-bold">Add Entry to {{ journal.title }}</h1>
+        <span id="autosave-indicator" class="text-sm text-gray-500 opacity-0 transition-opacity duration-300">
+            Saved
+        </span>
+    </div>
+
+    <!-- Entry Form -->
     <form method="post" enctype="multipart/form-data" class="space-y-6">
         {% csrf_token %}
 
+        <!-- Content Input -->
         <div>
             <label for="content" class="block text-sm font-semibold mb-1">Content (Markdown)</label>
-            <textarea name="content" id="content" class="border border-gray-600 bg-gray-800 text-white p-3 w-full rounded" rows="10"></textarea>
-            <div id="preview" class="markdown-preview bg-gray-900 border border-gray-700 p-4 mt-4 rounded text-white"></div>
+            <textarea name="content" id="content" class="border border-gray-400 bg-gray-50 text-gray-900 p-3 w-full focus:outline-none focus:ring-0 focus:border-blue-500 transition-all duration-300" rows="20"></textarea>
+            
+            <!-- Markdown Preview -->
+            <div id="preview" class="markdown-preview bg-gray-50 border border-gray-300 p-4 mt-4 rounded-lg text-gray-900"></div>
         </div>
 
+        <!-- Save & Upload -->
         <div class="flex items-end justify-between">
-            <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-5 py-2 rounded shadow">💾 Save</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg shadow transition">Save</button>
             <div class="text-right">
-                <label for="media" class="block text-sm font-semibold mb-1 text-white">Upload Media</label>
-                <input type="file" name="media" id="media" class="bg-gray-800 text-white border border-gray-600 rounded p-2">
+                <label for="media" class="block text-sm font-semibold mb-1">Upload Media</label>
+                <input type="file" name="media" id="media" class="bg-white text-gray-900 border border-gray-300 rounded-lg p-2 w-full">
             </div>
         </div>
     </form>
 </div>
 
+<!-- Markdown Script -->
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
-    document.getElementById('content').addEventListener('input', function () {
-        const markdownText = this.value;
-        const preview = document.getElementById('preview');
-        preview.innerHTML = marked.parse(markdownText);
+    const textarea = document.getElementById('content');
+    const preview = document.getElementById('preview');
+    const indicator = document.getElementById('autosave-indicator');
+    const journalId = '{{ journal.id }}';
+    const storageKey = `autosave_entry_${journalId}`;
+
+    // Restore from localStorage if available
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+        textarea.value = saved;
+        preview.innerHTML = marked.parse(saved);
+    }
+
+    // Live preview on input
+    textarea.addEventListener('input', () => {
+        preview.innerHTML = marked.parse(textarea.value);
+    });
+
+    function showSavedIndicator() {
+        indicator.classList.remove('opacity-0');
+        indicator.classList.add('opacity-100');
+        setTimeout(() => {
+            indicator.classList.remove('opacity-100');
+            indicator.classList.add('opacity-0');
+        }, 1000);
+    }
+
+    // Autosave every 10 seconds
+    setInterval(() => {
+        localStorage.setItem(storageKey, textarea.value);
+        showSavedIndicator();
+    }, 10000);
+
+    // Clear draft on submit
+    document.querySelector('form').addEventListener('submit', () => {
+        localStorage.removeItem(storageKey);
     });
 </script>
 
+<!-- Markdown Preview Styles -->
 <style>
 .markdown-preview h1 {
     font-size: 1.875rem;
@@ -57,18 +103,18 @@
     margin-bottom: 0.25rem;
 }
 .markdown-preview a {
-    color: #60a5fa;
+    color: #2563eb;
     text-decoration: underline;
 }
 .markdown-preview blockquote {
-    border-left: 4px solid #4b5563;
+    border-left: 4px solid #d1d5db;
     padding-left: 1rem;
-    color: #9ca3af;
+    color: #6b7280;
     font-style: italic;
     margin-bottom: 1rem;
 }
 .markdown-preview code {
-    background-color: #1f2937;
+    background-color: #f3f4f6;
     padding: 2px 4px;
     border-radius: 4px;
     font-family: monospace;

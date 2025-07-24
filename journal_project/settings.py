@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'your-fallback-secret-key')
-DEBUG = False
+DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -25,7 +25,18 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'storages',
     'journals',
+    'django.contrib.humanize',
+    'markdown_deux',
 ]
+MARKDOWN_DEUX_STYLES = {
+    "default": {
+        "extras": {
+            "pymdownx.tilde": True,
+            "extra": True,
+        },
+        "safe_mode": True,
+    },
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -59,12 +70,12 @@ WSGI_APPLICATION = 'journal_project.wsgi.application'
 
 # Database
 DATABASES = {
-    'default': dj_database_url.config(
-        default=os.getenv('DATABASE_URL'),
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {

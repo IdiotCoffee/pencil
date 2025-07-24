@@ -1,29 +1,31 @@
 {% extends 'base.html' %}
 {% block title %}Share {{ journal.title }}{% endblock %}
 {% block content %}
-    <h1 class="text-2xl mb-4">Share {{ journal.title }}</h1>
-    {% if messages %}
-        <ul class="mb-4">
-            {% for message in messages %}
-                <li class="{% if message.tags == 'success' %}text-green-600{% else %}text-red-600{% endif %}">{{ message }}</li>
+<div class="flex justify-center items-center min-h-screen bg-gray-100">
+    <div class="bg-white p-6 rounded-xl shadow-lg max-w-md w-full">
+        <h1 class="text-2xl font-bold mb-4 text-black font-inter">Share {{ journal.title }}</h1>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label for="username" class="block text-black font-inter">Username</label>
+                <input type="text" name="username" id="username" class="border p-2 w-full rounded-lg text-black font-inter" required>
+            </div>
+            <div>
+                <label for="can_edit" class="block text-black font-inter"><input type="checkbox" name="can_edit" id="can_edit" class="mr-2"> Allow Editing</label>
+            </div>
+            <div class="flex justify-center">
+                <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-full font-inter hover:bg-blue-600 transition duration-200">Share</button>
+            </div>
+        </form>
+        <h2 class="text-xl font-semibold mt-6 text-black font-inter">Current Permissions</h2>
+        <div class="mt-4 space-y-2">
+            {% for perm in permissions %}
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg shadow-sm">
+                <span class="text-black font-inter">{{ perm.user.username }}</span>
+                <span class="text-sm {% if perm.can_edit %}text-blue-600{% else %}text-gray-600{% endif %} font-inter">{{ perm.can_edit|yesno:"Edit,Read-only" }}</span>
+            </div>
             {% endfor %}
-        </ul>
-    {% endif %}
-    <form method="post" class="space-y-4">
-        {% csrf_token %}
-        <div>
-            <label for="username" class="block">Username</label>
-            <input type="text" name="username" id="username" class="border p-2 w-full" required>
         </div>
-        <div>
-            <label for="can_edit" class="block"><input type="checkbox" name="can_edit" id="can_edit"> Allow Editing</label>
-        </div>
-        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Share</button>
-    </form>
-    <h2 class="text-xl mt-4">Current Permissions</h2>
-    <ul>
-        {% for perm in permissions %}
-            <li>{{ perm.user.username }} - {{ perm.can_edit|yesno:"Edit,Read-only" }}</li>
-        {% endfor %}
-    </ul>
+    </div>
+</div>
 {% endblock %}

@@ -1,40 +1,147 @@
 <!DOCTYPE html>
-<html class="min-h-screen">
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>{% block title %}Journal{% endblock %}</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/marked@4.0.12/marked.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
-            margin: 0;
+            font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
         }
     </style>
+
+    <!-- Cal-Heatmap -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/cal-heatmap@3.6.2/cal-heatmap.css" rel="stylesheet" />
+
+    <!-- Markdown parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
-<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+<body class="bg-white text-white min-h-screen flex">
 
-    {% block navbar %}
-    <nav class="bg-gray-900 h-16 px-6 flex justify-between items-center shadow text-white text-lg">
-        <div class="flex gap-6">
-            <a href="{% url 'journal_list' %}" class="hover:underline">Home</a>
-            <a href="{% url 'activity_heatmap' %}" class="hover:underline">Heatmap</a>
-            <a href="{% url 'public_journals' %}" class="hover:underline">Browse Public Journals</a>
-        </div>
-        <div class="flex items-center gap-4">
-            {% if user.is_authenticated %}
-                <span class="text-sm">Hello, {{ user.username }}</span>
-                <form action="{% url 'logout' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="hover:underline">Logout</button>
-                </form>
-            {% else %}
-                <a href="{% url 'register' %}" class="hover:underline">Register</a>
-            {% endif %}
-        </div>
-    </nav>
-    {% endblock %}
+{% if user.is_authenticated %}
+<!-- Sidebar -->
+<aside class="w-64 bg-white text-gray-900 border-r border-gray-300 flex flex-col justify-between">
 
-    <div class="container mx-auto p-6">
-        {% block content %}{% endblock %}
+    <!-- Top -->
+    <div>
+        <!-- Title -->
+        <div class="text-2xl font-bold text-center py-6 border-b border-gray-300">
+             Pencil
+        </div>
+
+        <!-- Nav Links -->
+        <nav class="p-3">
+            <a href="{% url 'journal_list' %}" 
+               class="block w-full text-center py-3 transition duration-300 hover:bg-gray-200 {% if request.path == '/journals/' %}bg-gray-200{% endif %}">
+                My Journals
+            </a>
+            <hr class="border-t border-gray-300">
+            <a href="{% url 'journal_list' %}?section=shared" 
+               class="block w-full text-center py-3 transition duration-300 hover:bg-gray-200 {% if 'section=shared' in request.get_full_path %}bg-gray-200{% endif %}">
+                Shared
+            </a>
+            <hr class="border-t border-gray-300">
+            <a href="{% url 'journal_list' %}?section=public" 
+               class="block w-full text-center py-3 transition duration-300 hover:bg-gray-200 {% if 'section=public' in request.get_full_path %}bg-gray-200{% endif %}">
+                Public
+            </a>
+            <hr class="border-t border-gray-300">
+            <a href="{% url 'journal_list' %}?section=activity" 
+               class="block w-full text-center py-3 transition duration-300 hover:bg-gray-200 {% if 'section=activity' in request.get_full_path %}bg-gray-200{% endif %}">
+                Your Activity
+            </a>
+            <hr class="border-t border-gray-300">
+        </nav>
     </div>
+
+    <!-- Bottom -->
+    <div class="border-t border-gray-300 text-center py-4 space-y-2">
+        <div class="text-sm text-black font-semibold">
+            {{ user.username }}
+        </div>
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="text-red-600 text-sm hover:underline">
+                Logout
+            </button>
+        </form>
+    </div>
+</aside>
+{% endif %}
+
+<!-- Main Content -->
+<main class="flex-1 p-8 overflow-y-auto">
+    {% block content %}
+    {% endblock %}
+</main>
+<style>
+.markdown-body del, 
+.markdown-body s, 
+.markdown-body strike {
+    text-decoration: line-through;
+    color: #555;
+}
+
+.markdown-body {
+    font-family: monospace;
+    color: #000000;
+    line-height: 1.6;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: bold;
+    color: #000000;
+}
+
+.markdown-body h1 { font-size: 2em; }
+.markdown-body h2 { font-size: 1.6em; }
+.markdown-body h3 { font-size: 1.3em; }
+
+.markdown-body p {
+    margin-bottom: 1em;
+}
+
+.markdown-body ul {
+    list-style: disc;
+    padding-left: 2em;
+    margin-bottom: 1em;
+}
+
+.markdown-body ol {
+    list-style: decimal;
+    padding-left: 2em;
+    margin-bottom: 1em;
+}
+
+.markdown-body blockquote {
+    border-left: 4px solid #888;
+    padding-left: 1em;
+    color: #ccc;
+    font-style: italic;
+    margin: 1em 0;
+}
+
+.markdown-body code {
+    background-color: #222;
+    padding: 2px 4px;
+    border-radius: 4px;
+    font-size: 0.95em;
+    color: #ffd700;
+}
+</style>
+
+
 </body>
 </html>

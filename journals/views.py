@@ -28,31 +28,42 @@ def public_journals(request):
 def journal_list(request):
     user = request.user
 
-    # Journals owned by the current user
+    # Owned
     owned_journals = Journal.objects.filter(owner=user)
 
-    # Journals shared with the current user
+    # Shared with me
     shared_permissions = Permission.objects.filter(user=user).select_related('journal__owner')
     shared_journals = []
     for perm in shared_permissions:
         journal = perm.journal
-        journal.shared_by = journal.owner  # attach custom attribute for template use
+        journal.shared_by = journal.owner  # attach for display
         shared_journals.append(journal)
 
-    # Combine and send to template
-    journals = list(owned_journals) + shared_journals
+    # Public (not owned/shared)
+    public_journals = Journal.objects.filter(is_public=True).exclude(owner=user).exclude(permissions__user=user)
+
+    # Heatmap data
+    entries = Entry.objects.filter(user=user).values('created_at__date').annotate(count=Count('id'))
+    heatmap_data = {
+        int(datetime.combine(e['created_at__date'], datetime.min.time()).timestamp()): e['count']
+        for e in entries
+    }
 
     return render(request, 'journals/journal_list.html', {
-        'journals': journals,
-        'user': user
+        'owned_journals': owned_journals,
+        'shared_journals': shared_journals,
+        'public_journals': public_journals,
+        'heatmap_data': json.dumps(heatmap_data)
     })
-@login_required
-@login_required
-@login_required
+
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from .models import Journal
+import markdown
+
 def journal_detail(request, journal_id):
     journal = get_object_or_404(Journal, id=journal_id)
 
-    # ✅ Allow if user is owner, has permission, or it's public
     has_access = (
         journal.owner == request.user or
         journal.permissions.filter(user=request.user).exists() or
@@ -63,7 +74,20 @@ def journal_detail(request, journal_id):
 
     entries = journal.entries.order_by('-created_at')
 
-    # ✅ Can edit only if owner or has edit permission (public viewers can't)
+    # Render markdown for each entry
+    for entry in entries:
+        entry.rendered_content = markdown.markdown(
+            entry.content,
+            extensions=[
+                'fenced_code',
+                'tables',
+                'sane_lists',
+                'toc',
+                'nl2br',
+                'attr_list',
+            ]
+        )
+
     can_edit = (
         journal.owner == request.user or
         journal.permissions.filter(user=request.user, can_edit=True).exists()

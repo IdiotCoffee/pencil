@@ -114,6 +114,8 @@ Start a journal. Share it. Build something.
 
 ## 🧑‍💻 Author
 
+```
 Built by IdiotCoffee 
-Computer Engineering Graduate · Learning Django + AWS 
+Computer Engineering Graduate · Learning Django + AWS
+```
 
